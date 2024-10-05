@@ -7,15 +7,10 @@ import '../helpers/api_client.dart';
 
 class LoginService {
   Future<LoginResponse> login(String textEmail, String textPassword) async {
-    try {
-      final Response response = await ApiClient()
-          .post('login', {'email': textEmail, 'password': textPassword});
-      LoginResponse result = LoginResponse.fromJson(response.data);
-      return result;
-    } on DioException catch (e) {
-      print(e);
-      return LoginResponse.fromJson(e.response?.data);
-    }
+    final Response response = await ApiClient()
+        .post('login', {'email': textEmail, 'password': textPassword});
+    LoginResponse result = LoginResponse.fromJson(response.data);
+    return result;
   }
 
   Future<RegisterResponse> register(
@@ -24,5 +19,5 @@ class LoginService {
         {'email': textEmail, 'name': textName, 'password': textPassword});
     RegisterResponse result = RegisterResponse.fromJson(response.data);
     return result;
-  }
+}
 }

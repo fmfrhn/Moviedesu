@@ -31,7 +31,7 @@ class _RegisterPageState extends State<RegisterPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  "Login",
+                  "Register",
                   style: TextStyle(fontSize: 23, fontWeight: FontWeight.w500),
                 ),
                 SizedBox(
@@ -74,6 +74,12 @@ class _RegisterPageState extends State<RegisterPage> {
     return TextFormField(
       decoration: InputDecoration(labelText: "Email"),
       controller: _emailCtrl,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Email tidak boleh kosong!';
+        }
+        return null;
+      },
     );
   }
 
@@ -81,6 +87,12 @@ class _RegisterPageState extends State<RegisterPage> {
     return TextFormField(
       decoration: InputDecoration(labelText: "Name"),
       controller: _nameCtrl,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Nama tidak boleh kosong!';
+        }
+        return null;
+      },
     );
   }
 
@@ -89,6 +101,12 @@ class _RegisterPageState extends State<RegisterPage> {
       decoration: InputDecoration(labelText: "Password"),
       obscureText: true, // Menyembunyikan teks password
       controller: _passwordCtrl,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Masukkan password!';
+        }
+        return null;
+      },
     );
   }
 
@@ -101,30 +119,80 @@ class _RegisterPageState extends State<RegisterPage> {
           String email = _emailCtrl.text;
           String name = _nameCtrl.text;
           String password = _passwordCtrl.text;
-          await LoginService().register(email, name, password).then((response) {
-            if (response.status == true) {
-              Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (context) => LoginPage()));
-            } else {
-              AlertDialog alertDialog = AlertDialog(
-                content: Text("Username atau password tidak valid"),
-                actions: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text("Ok"),
-                    style:
-                        ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                  )
-                ],
-              );
-              showDialog(context: context, builder: (context) => alertDialog);
-            }
-          });
+          await LoginService().register(email, name, password).then(
+            (response) {
+              if (response.status == true) {
+                print("PESAN BERUPA : ${response.message}");
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => LoginPage()));
+              } else {
+                print("PESAN BERUPA : ${response.message}");
+                AlertDialog alertDialog = AlertDialog(
+                  content: Text("Username atau password tidak valid"),
+                  actions: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text("Ok"),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green),
+                    )
+                  ],
+                );
+                showDialog(context: context, builder: (context) => alertDialog);
+              }
+            },
+          );
         },
       ),
     );
   }
 
+//   Widget _tombolRegister() {
+//   return Container(
+//     width: MediaQuery.of(context).size.width,
+//     child: ElevatedButton(
+//       child: Text("Registrasi"),
+//       onPressed: () async {
+//         String email = _emailCtrl.text;
+//         String name = _nameCtrl.text;
+//         String password = _passwordCtrl.text;
+
+//         try {
+//           var response = await LoginService().register(email, name, password);
+//           if (response.status) {
+//             Navigator.pushReplacement(
+//                 context, MaterialPageRoute(builder: (context) => LoginPage()));
+//           } else {
+//             _showDialog(context, "Gagal", response.message ?? "Registrasi gagal.");
+//           }
+//         } catch (e) {
+//           _showDialog(context, "Kesalahan", "Terjadi kesalahan: ${e.toString()}");
+//         }
+//       },
+//     ),
+//   );
+// }
+
+// void _showDialog(BuildContext context, String title, String message) {
+//   showDialog(
+//     context: context,
+//     builder: (context) {
+//       return AlertDialog(
+//         title: Text(title),
+//         content: Text(message),
+//         actions: [
+//           ElevatedButton(
+//             onPressed: () {
+//               Navigator.pop(context);
+//             },
+//             child: Text("Ok"),
+//             style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+//           ),
+//         ],
+//       );
+//     },
+//   );
+// }
 }

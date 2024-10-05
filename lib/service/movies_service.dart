@@ -56,4 +56,15 @@ class MoviesService {
           print('Failed to add to watchlist: $e');
         }
   }
+
+  Future<void> deleteWatchlist ({
+    required String imdb_id
+  }) async {
+    try {
+      ApiClient().delete('delete_watchlist/$imdb_id');
+    } catch (e) {
+      print('Failed to delete watchlist: $e');
+    }
+  }
+
 }

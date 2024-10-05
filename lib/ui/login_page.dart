@@ -1,8 +1,5 @@
-// import 'package:dio/dio.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:moviedesu/model/login_response.dart';
-import 'package:moviedesu/widget/sidebar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../service/login_service.dart';
 import 'home.dart';
@@ -21,7 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: Sidebar(),
+      // drawer: Sidebar(),
       appBar: AppBar(
         title: Text("LoginPage"),
       ),
@@ -95,17 +92,32 @@ class _LoginPageState extends State<LoginPage> {
         onPressed: () async {
           String email = _emailCtrl.text;
           String password = _passwordCtrl.text;
-          await LoginService().login(email, password).then((response) async {
-            if (response.status == true) {
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              await prefs.setInt('userId', response.id);
-              print("User ID yang tersimpan: ${response.id}");
-              await prefs.setString('token', response.token);
-              Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (context) => Home()));
-            } else {
+
+          // Panggil API untuk login
+          await LoginService().login(email, password).then(
+            (response) async {
+              // Periksa respons login dari server
+              if (response.status == true) {
+                // Jika login berhasil, simpan user ID dan token di SharedPreferences
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                await prefs.setInt('userId', response.id);
+                await prefs.setString('email', response.email);
+                await prefs.setString('username', response.name);
+                await prefs.setString('token', response.token);
+                // print("User ID yang tersimpan: ${response.id}");
+
+                // Pindah ke halaman utama
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => Home()),
+                );
+              } else {}
+            },
+          ).catchError(
+            (e) {
+              // Tampilkan error jika terjadi kesalahan dalam pemanggilan API
               AlertDialog alertDialog = AlertDialog(
-                content: Text("Username atau password tidak valid"),
+                content: Text("Error: Username atau password tidak valid"),
                 actions: [
                   ElevatedButton(
                     onPressed: () {
@@ -118,24 +130,8 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               );
               showDialog(context: context, builder: (context) => alertDialog);
-            }
-          }).onError((LoginResponse e, stacktrace){
-            print("Error : ${e.status}");
-            AlertDialog alertDialog = AlertDialog(
-                content: Text("Username atau password tidak valid"),
-                actions: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text("Ok"),
-                    style:
-                        ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                  )
-                ],
-              );
-              showDialog(context: context, builder: (context) => alertDialog);
-          });
+            },
+          );
         },
       ),
     );
@@ -155,7 +151,9 @@ class _LoginPageState extends State<LoginPage> {
                 // Aksi ketika teks "Register now!" diklik
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => RegisterPage()), // Halaman registrasi
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          RegisterPage()), // Halaman registrasi
                 );
               },
           ),
@@ -164,3 +162,21 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+
+// .onError((LoginResponse e, stacktrace){
+//             print("Error : ${e.status}");
+//             AlertDialog alertDialog = AlertDialog(
+//                 content: Text("Username atau password tidak valid"),
+//                 actions: [
+//                   ElevatedButton(
+//                     onPressed: () {
+//                       Navigator.pop(context);
+//                     },
+//                     child: Text("Ok"),
+//                     style:
+//                         ElevatedButton.styleFrom(backgroundColor: Colors.green),
+//                   )
+//                 ],
+//               );
+//               showDialog(context: context, builder: (context) => alertDialog);
+//           })

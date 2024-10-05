@@ -29,7 +29,7 @@ class _WatchlistPageState extends State<WatchlistPage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       userId = prefs.getInt('userId');
-      print("User ID yang diambil di getUserId: $userId");
+      // print("User ID yang diambil di getUserId: $userId");
     });
     if (userId != null) {
       _showMovies(); // Panggil _showMovies setelah userId berhasil diambil
@@ -54,6 +54,51 @@ class _WatchlistPageState extends State<WatchlistPage> {
         _isLoading = false;
       });
     }
+  }
+
+  Future<void> _deleteWatchlist(String imdb_id) async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      await _moviesService.deleteWatchlist(imdb_id: imdb_id);
+      _showMovies(); // Muat ulang daftar setelah dihapus
+    } catch (error) {
+      setState(() {
+        _errorMessage = 'Failed to delete movie. Please try again.';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showDeleteConfirmationDialog(String imdbID) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Delete Confirmation"),
+          content: const Text("Are you sure you want to delete this watchlist?"),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("No"),
+              onPressed: () {
+                Navigator.of(context).pop(); // Tutup dialog
+              },
+            ),
+            TextButton(
+              child: const Text("Yes"),
+              onPressed: () {
+                Navigator.of(context).pop(); // Tutup dialog sebelum menghapus
+                _deleteWatchlist(imdbID); // Hapus item dari watchlist
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -98,6 +143,13 @@ class _WatchlistPageState extends State<WatchlistPage> {
                                           ),
                                         );
                                       },
+                                      trailing: IconButton(
+                                        icon: Icon(Icons.delete,
+                                            color: Colors.red),
+                                        onPressed: () {
+                                          _showDeleteConfirmationDialog(movie.imdbid);
+                                        },
+                                      ),
                                     ),
                                   );
                                 },
