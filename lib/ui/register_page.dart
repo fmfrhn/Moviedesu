@@ -119,31 +119,33 @@ class _RegisterPageState extends State<RegisterPage> {
           String email = _emailCtrl.text;
           String name = _nameCtrl.text;
           String password = _passwordCtrl.text;
+          // var response = await LoginService().register(email, name, password);
           await LoginService().register(email, name, password).then(
             (response) {
               if (response.status == true) {
                 print("PESAN BERUPA : ${response.message}");
                 Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: (context) => LoginPage()));
-              } else {
-                print("PESAN BERUPA : ${response.message}");
-                AlertDialog alertDialog = AlertDialog(
-                  content: Text("Username atau password tidak valid"),
-                  actions: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: Text("Ok"),
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green),
-                    )
-                  ],
-                );
-                showDialog(context: context, builder: (context) => alertDialog);
               }
+              if (response.status == false) {}
             },
-          );
+          ).catchError((e) {
+            print("PESAN BERUPA : ${e.toString()}");
+            AlertDialog alertDialog = AlertDialog(
+              content: Text("Email tidak valid!"),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text("Ok"),
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                )
+              ],
+            );
+            showDialog(context: context, builder: (context) => alertDialog);
+          });
         },
       ),
     );
