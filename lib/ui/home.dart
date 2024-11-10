@@ -13,13 +13,11 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final MoviesService _MoviesService = MoviesService();
-  final TextEditingController _searchController =
-      TextEditingController(); // TextField Controller
-  List<Movies> _movies = []; // List untuk menyimpan hasil pencarian film
-  String _errorMessage = ''; // Variabel untuk menyimpan pesan error
-  bool _isLoading = false; // Menandakan jika pencarian sedang berlangsung
+  final TextEditingController _searchController = TextEditingController();
+  List<Movies> _movies = [];
+  String _errorMessage = '';
+  bool _isLoading = false;
 
-  // Method untuk mengambil data film berdasarkan judul yang dimasukkan
   void _searchMovies() async {
     String query = _searchController.text;
     if (query.isEmpty) {
@@ -55,7 +53,13 @@ class _HomeState extends State<Home> {
     return Scaffold(
       drawer: Sidebar(),
       appBar: AppBar(
-        title: const Text('Movie Search'),
+        title: const Text(
+          'Movie Search',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+        ),
+        backgroundColor: Colors.deepPurple,
+        centerTitle: true,
+        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -65,57 +69,123 @@ class _HomeState extends State<Home> {
             TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                labelText: 'Enter Movie Title',
-                border: OutlineInputBorder(),
+                hintText: 'Enter Movie Title',
+                hintStyle: TextStyle(color: Colors.grey[500]),
+                filled: true,
+                fillColor: Colors.grey[100],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                  borderSide: BorderSide.none,
+                ),
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: _searchMovies, // Panggil method pencarian
+                  icon: const Icon(Icons.search, color: Colors.deepPurple),
+                  onPressed: _searchMovies,
                 ),
               ),
             ),
             const SizedBox(height: 20),
             _isLoading
-                ? const CircularProgressIndicator() // Tampilkan loading jika pencarian sedang berlangsung
+                ? const CircularProgressIndicator()
                 : _errorMessage.isNotEmpty
-                    ? Text(_errorMessage,
-                        style: TextStyle(
-                            color: Colors.red)) // Tampilkan error jika ada
+                    ? Text(
+                        _errorMessage,
+                        style: const TextStyle(color: Colors.red, fontSize: 16),
+                      )
                     : Expanded(
-                        // Tampilkan hasil pencarian jika ada
                         child: _movies.isNotEmpty
                             ? ListView.builder(
                                 itemCount: _movies.length,
                                 itemBuilder: (context, index) {
                                   final movie = _movies[index];
-                                  return Card(
-                                    child: ListTile(
-                                      leading: movie.poster != 'N/A'
-                                          ? Image.network(
-                                              movie.poster,
-                                              width: 50,
-                                              fit: BoxFit.cover,
-                                            )
-                                          : const Icon(Icons
-                                              .image_not_supported), // Placeholder jika poster tidak tersedia
-                                      title: Text(movie.title),
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => DetailMovie(
-                                                imdbID: movie.imdbid),
-                                          ),
-                                        );
-                                      },
+                                  return FadeIn(
+                                    duration: Duration(milliseconds: 300),
+                                    child: Card(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12.0),
+                                      ),
+                                      elevation: 3,
+                                      margin: const EdgeInsets.symmetric(vertical: 8),
+                                      child: ListTile(
+                                        leading: movie.poster != null && movie.poster != 'N/A'
+                                            ? ClipRRect(
+                                                borderRadius: BorderRadius.circular(8.0),
+                                                child: Image.network(
+                                                  movie.poster ?? '', // Handle null values
+                                                  width: 60,
+                                                  height: 90,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              )
+                                            : const Icon(Icons.image_not_supported,
+                                                color: Colors.grey),
+                                        title: Text(
+                                          movie.title ?? 'No title available', // Handle null values
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold, fontSize: 18),
+                                        ),
+                                        subtitle: Text(
+                                          'Release: ${movie.year ?? 'Unknown'}', // Handle null values
+                                          style: TextStyle(color: Colors.grey[600]),
+                                        ),
+                                        trailing: const Icon(Icons.arrow_forward_ios,
+                                            color: Colors.deepPurple, size: 16),
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  DetailMovie(imdbID: movie.imdbid ?? ''),
+                                            ),
+                                          );
+                                        },
+                                      ),
                                     ),
                                   );
                                 },
                               )
-                            : const Text('No movies found'),
+                            : const Text(
+                                'No movies found',
+                                style: TextStyle(fontSize: 18),
+                              ),
                       ),
           ],
         ),
       ),
     );
+  }
+}
+
+// Widget FadeIn sederhana untuk menambahkan animasi
+class FadeIn extends StatefulWidget {
+  final Widget child;
+  final Duration duration;
+
+  const FadeIn({required this.child, this.duration = const Duration(milliseconds: 500)});
+
+  @override
+  _FadeInState createState() => _FadeInState();
+}
+
+class _FadeInState extends State<FadeIn> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: widget.duration, vsync: this);
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(opacity: _animation, child: widget.child);
   }
 }

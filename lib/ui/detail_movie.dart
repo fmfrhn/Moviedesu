@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:moviedesu/service/movies_service.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
+import 'package:moviedesu/widget/rating_drawer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DetailMovie extends StatefulWidget {
   final String imdbID;
@@ -13,13 +14,15 @@ class DetailMovie extends StatefulWidget {
 
 class _DetailMovieState extends State<DetailMovie> {
   Map<String, dynamic>? movieDetail;
-  int? userId; // Variabel untuk menyimpan userId dari SharedPreferences
+  int? userId;
+  final GlobalKey<ScaffoldState> _scaffoldKey =
+      GlobalKey<ScaffoldState>(); // Global key untuk Scaffold
 
   @override
   void initState() {
     super.initState();
     _fetchMovieDetail();
-    _getUserId(); // Ambil userId dari SharedPreferences
+    _getUserId();
   }
 
   void _fetchMovieDetail() async {
@@ -30,18 +33,15 @@ class _DetailMovieState extends State<DetailMovie> {
     });
   }
 
-  // Ambil userId dari SharedPreferences
   Future<void> _getUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       userId = prefs.getInt('userId');
-      print("User ID yang diambil di getUserId: $userId");
     });
   }
 
   void _addToWatchlist() async {
     if (userId != null && movieDetail != null) {
-      // Gunakan MoviesService untuk menambah film ke watchlist
       await MoviesService().addToWatchlist(
         userId: userId!,
         imdbID: movieDetail!['imdbID'],
@@ -51,65 +51,240 @@ class _DetailMovieState extends State<DetailMovie> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Movie added to Watchlist")),
       );
-      print("User ID yang diambil di addToWatchList: $userId");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey, // Menetapkan key di Scaffold
       appBar: AppBar(
-        title: Text('Movie Detail'),
+        title: const Text('Movie Detail'),
+        backgroundColor: Colors.deepPurple,
+        centerTitle: true,
       ),
       body: movieDetail != null
           ? SingleChildScrollView(
-              // Bungkus dengan SingleChildScrollView untuk scroll vertikal
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      movieDetail!['Title'] ?? 'No Title',
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    Center(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: movieDetail!['Poster'] != "N/A"
+                            ? Image.network(
+                                movieDetail!['Poster'],
+                                height: 300,
+                                fit: BoxFit.cover,
+                              )
+                            : Container(
+                                height: 200,
+                                width: 150,
+                                color: Colors.grey,
+                                child: const Icon(Icons.movie, size: 80),
+                              ),
+                      ),
                     ),
-                    SizedBox(height: 20),
-                    movieDetail!['Poster'] != "N/A"
-                        ? Image.network(movieDetail!['Poster'])
-                        : Container(
-                            height: 200,
-                            width: double.infinity,
-                            color: Colors.grey,
-                            child: Icon(Icons.movie, size: 100),
+                    const SizedBox(height: 20),
+                    Center(
+                      child: Text(
+                        movieDetail!['Title'] ?? 'No Title',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Center(
+                      child: Text(
+                        '(${movieDetail!['Released'] ?? 'N/A'})',
+                        style: TextStyle(fontSize: 18, color: Colors.grey[700]),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // IMDb Rating
+                    Row(
+                      children: [
+                        const Icon(Icons.star, color: Colors.yellow),
+                        const SizedBox(width: 8),
+                        Text(
+                          'IMDb Rating: ${movieDetail!['imdbRating'] ?? 'N/A'}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
                           ),
-                    SizedBox(height: 20),
-                    Text(
-                      'Year: ${movieDetail!['Year'] ?? 'N/A'}',
-                      style: TextStyle(fontSize: 18),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 10),
-                    Text(
-                      'Genre: ${movieDetail!['Genre'] ?? 'N/A'}',
-                      style: TextStyle(fontSize: 18),
+                    const SizedBox(height: 10),
+                    // IMDb Votes
+                    Row(
+                      children: [
+                        const Icon(Icons.thumb_up, color: Colors.blue),
+                        const SizedBox(width: 8),
+                        Text(
+                          'IMDb Votes: ${movieDetail!['imdbVotes'] ?? 'N/A'}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 10),
-                    Text(
-                      'Plot: ${movieDetail!['Plot'] ?? 'N/A'}',
-                      style: TextStyle(fontSize: 18),
+                    const SizedBox(height: 10),
+                    // Box Office
+                    Row(
+                      children: [
+                        const Icon(Icons.attach_money, color: Colors.green),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Box Office: ${movieDetail!['BoxOffice'] ?? 'N/A'}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _addToWatchlist,
-                      child: Text("Add to Watchlist"),
+                    const SizedBox(height: 20),
+                    Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      elevation: 3,
+                      margin: const EdgeInsets.symmetric(vertical: 10),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Genre: ${movieDetail!['Genre'] ?? 'N/A'}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Plot:',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              movieDetail!['Plot'] ??
+                                  'No description available.',
+                              style: const TextStyle(fontSize: 16),
+                              textAlign: TextAlign.justify,
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Director: ${movieDetail!['Director'] ?? 'N/A'}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Actors: ${movieDetail!['Actors'] ?? 'N/A'}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Runtime: ${movieDetail!['Runtime'] ?? 'N/A'}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Language: ${movieDetail!['Language'] ?? 'N/A'}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Country: ${movieDetail!['Country'] ?? 'N/A'}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Awards: ${movieDetail!['Awards'] ?? 'N/A'}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: _addToWatchlist,
+                            icon: const Icon(Icons.add, size: 18),
+                            label: const Text("Add to Watchlist"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors
+                                  .white, // Use backgroundColor instead of primary
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                              width: 16), // Add some space between the buttons
+                          ElevatedButton(
+                            onPressed: () {
+                              // Tampilkan drawer dengan menggunakan key
+                              _scaffoldKey.currentState?.openEndDrawer();
+                            },
+                            child: const Text('Rate & Comment'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors
+                                  .greenAccent, // Choose any color you like
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
             )
-          : Center(
+          : const Center(
               child: CircularProgressIndicator(),
             ),
+      // Menggunakan RatingDrawer dari rating_drawer.dart
+      endDrawer: const RatingDrawer(),
     );
   }
 }
