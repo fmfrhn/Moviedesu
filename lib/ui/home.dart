@@ -5,7 +5,7 @@ import 'package:moviedesu/ui/detail_movie.dart';
 import 'package:moviedesu/widget/sidebar.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  const Home({super.key});
 
   @override
   _HomeState createState() => _HomeState();
@@ -51,7 +51,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: Sidebar(),
+      drawer: const Sidebar(),
       appBar: AppBar(
         title: const Text(
           'Movie Search',
@@ -93,51 +93,103 @@ class _HomeState extends State<Home> {
                       )
                     : Expanded(
                         child: _movies.isNotEmpty
-                            ? ListView.builder(
+                            ? GridView.builder(
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2, // Jumlah kolom
+                                  crossAxisSpacing:
+                                      16, // Jarak horizontal antar card
+                                  mainAxisSpacing:
+                                      16, // Jarak vertikal antar card
+                                  childAspectRatio:
+                                      0.7, // Rasio aspek card (width / height)
+                                ),
                                 itemCount: _movies.length,
                                 itemBuilder: (context, index) {
                                   final movie = _movies[index];
                                   return FadeIn(
-                                    duration: Duration(milliseconds: 300),
+                                    duration: const Duration(milliseconds: 300),
                                     child: Card(
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12.0),
+                                        borderRadius:
+                                            BorderRadius.circular(12.0),
                                       ),
                                       elevation: 3,
-                                      margin: const EdgeInsets.symmetric(vertical: 8),
-                                      child: ListTile(
-                                        leading: movie.poster != null && movie.poster != 'N/A'
-                                            ? ClipRRect(
-                                                borderRadius: BorderRadius.circular(8.0),
-                                                child: Image.network(
-                                                  movie.poster ?? '', // Handle null values
-                                                  width: 60,
-                                                  height: 90,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              )
-                                            : const Icon(Icons.image_not_supported,
-                                                color: Colors.grey),
-                                        title: Text(
-                                          movie.title ?? 'No title available', // Handle null values
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold, fontSize: 18),
-                                        ),
-                                        subtitle: Text(
-                                          'Release: ${movie.year ?? 'Unknown'}', // Handle null values
-                                          style: TextStyle(color: Colors.grey[600]),
-                                        ),
-                                        trailing: const Icon(Icons.arrow_forward_ios,
-                                            color: Colors.deepPurple, size: 16),
+                                      child: InkWell(
                                         onTap: () {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) =>
-                                                  DetailMovie(imdbID: movie.imdbid ?? ''),
+                                              builder: (context) => DetailMovie(
+                                                  imdbID: movie.imdbid ?? ''),
                                             ),
                                           );
                                         },
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            // Poster film
+                                            movie.poster != null &&
+                                                    movie.poster != 'N/A'
+                                                ? ClipRRect(
+                                                    borderRadius:
+                                                        const BorderRadius
+                                                            .vertical(
+                                                      top:
+                                                          Radius.circular(12.0),
+                                                    ),
+                                                    child: Image.network(
+                                                      movie.poster ?? '',
+                                                      width: double.infinity,
+                                                      height: 150,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  )
+                                                : Container(
+                                                    width: double.infinity,
+                                                    height: 150,
+                                                    color: Colors.grey[300],
+                                                    child: const Icon(
+                                                      Icons.image_not_supported,
+                                                      size: 50,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  // Judul film
+                                                  Text(
+                                                    movie.title ??
+                                                        'No title available',
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 16,
+                                                    ),
+                                                    maxLines: 2,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  // Tahun rilis film
+                                                  Text(
+                                                    'Release: ${movie.year ?? 'Unknown'}',
+                                                    style: TextStyle(
+                                                      color: Colors.grey[600],
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   );
@@ -160,7 +212,8 @@ class FadeIn extends StatefulWidget {
   final Widget child;
   final Duration duration;
 
-  const FadeIn({required this.child, this.duration = const Duration(milliseconds: 500)});
+  const FadeIn(
+      {required this.child, this.duration = const Duration(milliseconds: 500)});
 
   @override
   _FadeInState createState() => _FadeInState();
