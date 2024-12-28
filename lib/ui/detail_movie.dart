@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:moviedesu/service/movies_service.dart';
-import 'package:moviedesu/widget/rating_drawer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:moviedesu/widget/review_popup.dart'; // Import ReviewPopup jika ada di file terpisah
 
 class DetailMovie extends StatefulWidget {
   final String imdbID;
@@ -15,8 +16,6 @@ class DetailMovie extends StatefulWidget {
 class _DetailMovieState extends State<DetailMovie> {
   Map<String, dynamic>? movieDetail;
   int? userId;
-  final GlobalKey<ScaffoldState> _scaffoldKey =
-      GlobalKey<ScaffoldState>(); // Global key untuk Scaffold
 
   @override
   void initState() {
@@ -57,7 +56,6 @@ class _DetailMovieState extends State<DetailMovie> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey, // Menetapkan key di Scaffold
       appBar: AppBar(
         title: const Text('Movie Detail'),
         backgroundColor: Colors.deepPurple,
@@ -106,7 +104,6 @@ class _DetailMovieState extends State<DetailMovie> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    // IMDb Rating
                     Row(
                       children: [
                         const Icon(Icons.star, color: Colors.yellow),
@@ -121,7 +118,6 @@ class _DetailMovieState extends State<DetailMovie> {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    // IMDb Votes
                     Row(
                       children: [
                         const Icon(Icons.thumb_up, color: Colors.blue),
@@ -136,7 +132,6 @@ class _DetailMovieState extends State<DetailMovie> {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    // Box Office
                     Row(
                       children: [
                         const Icon(Icons.attach_money, color: Colors.green),
@@ -246,8 +241,7 @@ class _DetailMovieState extends State<DetailMovie> {
                             icon: const Icon(Icons.add, size: 18),
                             label: const Text("Add to Watchlist"),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors
-                                  .white, // Use backgroundColor instead of primary
+                              backgroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 12),
                               shape: RoundedRectangleBorder(
@@ -255,17 +249,18 @@ class _DetailMovieState extends State<DetailMovie> {
                               ),
                             ),
                           ),
-                          const SizedBox(
-                              width: 16), // Add some space between the buttons
+                          const SizedBox(width: 16),
                           ElevatedButton(
                             onPressed: () {
-                              // Tampilkan drawer dengan menggunakan key
-                              _scaffoldKey.currentState?.openEndDrawer();
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) =>
+                                    const ReviewPopup(),
+                              );
                             },
                             child: const Text('Rate & Comment'),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors
-                                  .greenAccent, // Choose any color you like
+                              backgroundColor: Colors.greenAccent,
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 12),
                               shape: RoundedRectangleBorder(
@@ -283,8 +278,6 @@ class _DetailMovieState extends State<DetailMovie> {
           : const Center(
               child: CircularProgressIndicator(),
             ),
-      // Menggunakan RatingDrawer dari rating_drawer.dart
-      endDrawer: const RatingDrawer(),
     );
   }
 }

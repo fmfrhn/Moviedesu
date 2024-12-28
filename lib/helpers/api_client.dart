@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 
 final Dio dio = Dio(BaseOptions(
-  baseUrl: "http://192.168.1.7:8000/api/",
+  baseUrl: "http://192.168.106.221:8000/api/",
     connectTimeout: Duration(seconds: 10),
-    receiveTimeout: Duration(seconds: 3)));
+    receiveTimeout: Duration(seconds: 10)));
 
 class ApiClient {
   Future<Response> get(String path) async {

@@ -48,10 +48,10 @@ class _SidebarState extends State<Sidebar> {
         children: [
           UserAccountsDrawerHeader(
             currentAccountPicture: CircleAvatar(
-              child: Icon(
-                Icons.person,
-                size: 50,
-              ),
+              radius: 30, // Ukuran lingkaran
+              backgroundImage: AssetImage('assets/suisei.jpg'),
+              backgroundColor: Colors
+                  .transparent, // Menjaga transparansi latar belakang jika diperlukan
             ),
             accountName: Text(username ?? 'Guest'),
             accountEmail: Text(email ?? 'guest@example.com'),

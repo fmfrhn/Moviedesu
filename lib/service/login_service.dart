@@ -1,8 +1,7 @@
+// login_service.dart
 import 'package:dio/dio.dart';
 import 'package:moviedesu/model/login_response.dart';
 import 'package:moviedesu/model/register_response.dart';
-// import 'package:moviedesu/model/user.dart';
-
 import '../helpers/api_client.dart';
 
 class LoginService {

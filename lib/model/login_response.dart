@@ -1,3 +1,4 @@
+// login_response.dart
 class LoginResponse {
   final bool status;
   final String message;

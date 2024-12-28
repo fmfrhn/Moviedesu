@@ -3,6 +3,7 @@ import 'package:moviedesu/model/movies.dart';
 import 'package:moviedesu/service/movies_service.dart';
 import 'package:moviedesu/ui/detail_movie.dart';
 import 'package:moviedesu/widget/sidebar.dart';
+import 'package:moviedesu/widget/app_bar.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -52,20 +53,12 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const Sidebar(),
-      appBar: AppBar(
-        title: const Text(
-          'Movie Search',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-        ),
-        backgroundColor: Colors.deepPurple,
-        centerTitle: true,
-        elevation: 0,
-      ),
+      appBar: CustomAppBar(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // TextField untuk memasukkan judul film yang akan dicari
+            // Search field
             TextField(
               controller: _searchController,
               decoration: InputDecoration(
@@ -84,122 +77,157 @@ class _HomeState extends State<Home> {
               ),
             ),
             const SizedBox(height: 20),
-            _isLoading
-                ? const CircularProgressIndicator()
-                : _errorMessage.isNotEmpty
-                    ? Text(
-                        _errorMessage,
-                        style: const TextStyle(color: Colors.red, fontSize: 16),
-                      )
-                    : Expanded(
-                        child: _movies.isNotEmpty
-                            ? GridView.builder(
-                                gridDelegate:
-                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2, // Jumlah kolom
-                                  crossAxisSpacing:
-                                      16, // Jarak horizontal antar card
-                                  mainAxisSpacing:
-                                      16, // Jarak vertikal antar card
-                                  childAspectRatio:
-                                      0.7, // Rasio aspek card (width / height)
-                                ),
-                                itemCount: _movies.length,
-                                itemBuilder: (context, index) {
-                                  final movie = _movies[index];
-                                  return FadeIn(
-                                    duration: const Duration(milliseconds: 300),
-                                    child: Card(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                      ),
-                                      elevation: 3,
-                                      child: InkWell(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => DetailMovie(
-                                                  imdbID: movie.imdbid ?? ''),
-                                            ),
-                                          );
-                                        },
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            // Poster film
-                                            movie.poster != null &&
-                                                    movie.poster != 'N/A'
-                                                ? ClipRRect(
-                                                    borderRadius:
-                                                        const BorderRadius
-                                                            .vertical(
-                                                      top:
-                                                          Radius.circular(12.0),
-                                                    ),
-                                                    child: Image.network(
-                                                      movie.poster ?? '',
-                                                      width: double.infinity,
-                                                      height: 150,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  )
-                                                : Container(
-                                                    width: double.infinity,
-                                                    height: 150,
-                                                    color: Colors.grey[300],
-                                                    child: const Icon(
-                                                      Icons.image_not_supported,
-                                                      size: 50,
-                                                      color: Colors.grey,
-                                                    ),
-                                                  ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  // Judul film
-                                                  Text(
-                                                    movie.title ??
-                                                        'No title available',
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 16,
-                                                    ),
-                                                    maxLines: 2,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                  const SizedBox(height: 4),
-                                                  // Tahun rilis film
-                                                  Text(
-                                                    'Release: ${movie.year ?? 'Unknown'}',
-                                                    style: TextStyle(
-                                                      color: Colors.grey[600],
-                                                      fontSize: 14,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              )
-                            : const Text(
-                                'No movies found',
-                                style: TextStyle(fontSize: 18),
-                              ),
+            _searchController.text.isEmpty
+                ? Expanded(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment
+                            .center, // Centers both the logo and text
+                        crossAxisAlignment: CrossAxisAlignment
+                            .center, // Ensures text is centered horizontally
+                        children: [
+                          Image.asset(
+                            'assets/moviedesu-nobg.png', // Replace with your logo image path
+                            height: 300, // Set the size of the logo
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            'Try Find Your Movie Now!!!', // Text to display below the logo
+                            style: TextStyle(
+                              fontSize: 18, // Text size
+                              fontWeight: FontWeight.bold, // Text style
+                              color: Colors.deepPurple, // Text color
+                            ),
+                          ),
+                        ],
                       ),
+                    ),
+                  )
+                : _isLoading
+                    ? const CircularProgressIndicator()
+                    : _errorMessage.isNotEmpty
+                        ? Text(
+                            _errorMessage,
+                            style: const TextStyle(
+                                color: Colors.red, fontSize: 16),
+                          )
+                        : Expanded(
+                            child: _movies.isNotEmpty
+                                ? GridView.builder(
+                                    gridDelegate:
+                                        const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2, // Number of columns
+                                      crossAxisSpacing:
+                                          16, // Horizontal space between cards
+                                      mainAxisSpacing:
+                                          16, // Vertical space between cards
+                                      childAspectRatio:
+                                          0.7, // Aspect ratio of cards (width / height)
+                                    ),
+                                    itemCount: _movies.length,
+                                    itemBuilder: (context, index) {
+                                      final movie = _movies[index];
+                                      return FadeIn(
+                                        duration:
+                                            const Duration(milliseconds: 300),
+                                        child: Card(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12.0),
+                                          ),
+                                          elevation: 3,
+                                          child: InkWell(
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      DetailMovie(
+                                                          imdbID:
+                                                              movie.imdbid ??
+                                                                  ''),
+                                                ),
+                                              );
+                                            },
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                // Movie poster
+                                                movie.poster != null &&
+                                                        movie.poster != 'N/A'
+                                                    ? ClipRRect(
+                                                        borderRadius:
+                                                            const BorderRadius
+                                                                .vertical(
+                                                          top: Radius.circular(
+                                                              12.0),
+                                                        ),
+                                                        child: Image.network(
+                                                          movie.poster ?? '',
+                                                          width:
+                                                              double.infinity,
+                                                          height: 150,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      )
+                                                    : Container(
+                                                        width: double.infinity,
+                                                        height: 150,
+                                                        color: Colors.grey[300],
+                                                        child: const Icon(
+                                                          Icons
+                                                              .image_not_supported,
+                                                          size: 50,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      // Movie title
+                                                      Text(
+                                                        movie.title ??
+                                                            'No title available',
+                                                        style: const TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 16,
+                                                        ),
+                                                        maxLines: 2,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                      const SizedBox(height: 4),
+                                                      // Movie release year
+                                                      Text(
+                                                        'Release: ${movie.year ?? 'Unknown'}',
+                                                        style: TextStyle(
+                                                          color:
+                                                              Colors.grey[600],
+                                                          fontSize: 14,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  )
+                                : const Text(
+                                    'No movies found',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                          ),
           ],
         ),
       ),
@@ -207,7 +235,7 @@ class _HomeState extends State<Home> {
   }
 }
 
-// Widget FadeIn sederhana untuk menambahkan animasi
+// Widget FadeIn to add animation
 class FadeIn extends StatefulWidget {
   final Widget child;
   final Duration duration;
